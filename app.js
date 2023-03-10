@@ -21,12 +21,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(session({
     secret: "Our little secret is.",
     resave:false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {} 
 }));
 
-app.use(passport.initialize());
-app.use(passport.session())
+
 
 mongoose.set('strictQuery', false);
 mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true}).then(console.log("Connected to local MongoDB"));
@@ -40,9 +39,14 @@ userSchema.plugin(passportLocalMongoose); // Hash & salt our passwords.
 
 const User = new mongoose.model("User", userSchema);
 
-passport.use(newUser.createStrategy());
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+
 
 app.get("/", function(req, res){
     res.render("home");
@@ -71,10 +75,6 @@ app.get("/secrets", function(req, res){
 
 });
 
-// app.post("/register", registerUser, passport.authenticate('local', {failureRedirect: '/register', failureMessage: true}), function(req, res){
-//     res.redirect("/secrets");
-// });
-
 function registerUser(req, res, next){
 
     console.log("In register Usrer");
@@ -96,41 +96,20 @@ app.post("/register", function(req, res){
 
     const userName = req.body.username;
     const password = req.body.password;
-    // User.register({username: req.body.username}, req.body.password, function(err, user) {
-
-    //     console.log("The user " + user + " is now registerd.");
-    //     console.log("The ERROR object is: " + err);
-
-    //     if(err){
-    //         console.log(err + "_____ Redirecting: register.");
-    //         res.redirect('/register');
-    //     } else {
-    //         passport.authenticate("local", { failureRedirect: '/register' }, function (req, res) {
-    //             console.log("In here");
-    //             console.log(req.user);
-    //             res.redirect('/secrets');
-    //         }
-    //     )}
-    //   });
 
     User.register({username: userName}, password, function(err, user) {
         if(err){
             console.log("ERROR:" + err);
             res.redirect('/register');
-        }
-        console.log("A new user " + user);
-        const authenticate = User.authenticate();
-        authenticate(userName, password, function(err, result){
-            if(err){
-                console.log("ERROR --- " + err);
-                res.redirect('/register');
-            } else {
+        } else {
+            passport.authenticate("local")(req, res, function(){
                 console.log(req.isAuthenticated());
-                console.log(userName);
                 res.redirect('/secrets');
-            }
-        });
+            });
+        }
     });
+
+
 });
 
 app.post("/login", function(req, res){
@@ -140,5 +119,3 @@ app.post("/login", function(req, res){
 
 
 app.listen(3000, () => console.log("Server started on port 3000."));
-
-// how to aurhenticate a request using passpord local mongoose?
