@@ -70,27 +70,7 @@ app.get("/secrets", function(req, res){
         console.log("req is not authenticated.");
         res.redirect("/login")
     }
-
-    //res.render("secrets");
-
-});
-
-function registerUser(req, res, next){
-
-    console.log("In register Usrer");
-    User.register({username: req.body.username}, req.body.password, function(err, user){
-        console.log("The user " + user + " is now registerd.");
-        console.log("The ERROR object is: " + err);
-        if(err){
-            console.log("Error -> redirecting to register.");
-        }
     });
-    next();
-}
-
-function authenticateUser(req, res){
-
-}
 
 app.post("/register", function(req, res){
 
