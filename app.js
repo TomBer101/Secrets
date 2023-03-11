@@ -1,12 +1,12 @@
 //jshint esversion:6
 require('dotenv').config();
-
+require('./oauth.js');
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const exp = require("constants");
 
-const mongoose = require("mongoose");
+//const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
@@ -27,20 +27,19 @@ app.use(session({
     cookie: {} 
 }));
 
+const User = require('./models/User');
+// mongoose.set('strictQuery', false);
+// mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true}).then(console.log("Connected to local MongoDB"));
 
+// const userSchema = new mongoose.Schema({
+//     email: String,
+//     password: String
+// });
 
-mongoose.set('strictQuery', false);
-mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true}).then(console.log("Connected to local MongoDB"));
+// userSchema.plugin(passportLocalMongoose); // Hash & salt our passwords.
+// userSchema.plugin(findOrCreate);
 
-const userSchema = new mongoose.Schema({
-    email: String,
-    password: String
-});
-
-userSchema.plugin(passportLocalMongoose); // Hash & salt our passwords.
-userSchema.plugin(findOrCreate);
-
-const User = new mongoose.model("User", userSchema);
+// const User = new mongoose.model("User", userSchema);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -69,16 +68,16 @@ app.get("/", function(req, res){
     res.render("home");
 });
 
-app.get("/auth/google", function(req, res){
-    console.log("In register Usrer");
-    passport.authenticate("google", { scope: ["profile"] });
-})
+// app.get("/auth/google", function(req, res){
+//     console.log("In register Usrer");
+//     passport.authenticate("google", { scope: ["profile"] });
+// })
 
-// app.get('/auth/google', 
-//              passport.authenticate('google', {
-//                scope: ['profile', 'email']
-//              })              
-//            );
+app.get('/auth/google', 
+             passport.authenticate('google', {
+               scope: ['profile']
+             })              
+           );
 
 app.get("/auth/google/secrets", 
     passport.authenticate("google", {failureRedirect: "/login"}),
