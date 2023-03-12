@@ -8,7 +8,10 @@ mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true}).th
 
 const userSchema = new mongoose.Schema({
     email: String,
-    password: String
+    password: String,
+    googleId: String,
+    facebookId: String,
+    secret: String
 });
 
 userSchema.plugin(passportLocalMongoose); // Hash & salt our passwords.
